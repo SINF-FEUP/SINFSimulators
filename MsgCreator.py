@@ -120,17 +120,20 @@ class MsgCreator(object):
 #                raise argparse.ArgumentTypeError("min > max in dist \"%s\"" % (i))
     
     def idToidR(self, moteId):
-        hexStr = str(hex(moteId)[2:]).upper()
-        hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-        if len(hexStr) < 2:
-                hexStr.insert(0,'00')
-        hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+        strHex = "0x%0.4X" % moteId
+        strHex = strHex[2:]
+        hexStr = strHex[:2] + ' ' + strHex[2:]
+#        hexStr = str(hex(moteId)[2:]).upper()
+#        hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
+#        if len(hexStr) < 2:
+#                hexStr.insert(0,'00')
+#        hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
         return hexStr
     
     # Read: https://www.advanticsys.com/wiki/index.php?title=TestCM5000
     def vrefTovrefR(self,vref):
         # 2.96V -> 4046
-        # Voltage = value/4096 C Vref x 2, Vref = 1.5V
+        # Voltage = value/4096 × Vref x 2, Vref = 1.5V
         
         lower = 0.0
         upper = 5.0
@@ -144,11 +147,15 @@ class MsgCreator(object):
             vref = 3
         if isinstance(vref,(int,float)):
             vrefR = int((vref/3)*4096)
-            hexStr = str(hex(vrefR)[2:]).upper()
-            hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-            if len(hexStr) < 2:
-                hexStr.insert(0,'00')
-            hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+            strHex = "0x%0.4X" % vrefR
+            strHex = strHex[2:]
+            hexStr = strHex[:2] + ' ' + strHex[2:]
+#            vrefR = int((vref/3)*4096)
+#            hexStr = str(hex(vrefR)[2:]).upper()
+#            hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
+#            if len(hexStr) < 2:
+#                hexStr.insert(0,'00')
+#            hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
             
             return hexStr
             
@@ -156,9 +163,9 @@ class MsgCreator(object):
     def photoTophotoR(self,photo):
         # 462.95 Lux -> 205
         # photo = round((photoR/4096.0*vref/2.0/10**5)*0.625*10**6*10**3,2)
-        #   Vsensor = (ADCvalue/4096) C Vref , Vref=1.5V
+        #   Vsensor = (ADCvalue/4096) × Vref , Vref=1.5V
         #      I = Vsensor / 100000
-        #   S1087 lx = 0.625 C 10^6 C I C 1000
+        #   S1087 lx = 0.625 × 10^6 × I × 1000
         
         lower = 0
         upper = 3500
@@ -172,14 +179,18 @@ class MsgCreator(object):
             return "00 00"
         else:
             if isinstance(photo,(int,float)):
-                intensity = photo/0.625/10**6/1000
-                vsensor = intensity*10**5
-                photoR = int((vsensor/1.5)*4096)
-                hexStr = str(hex(photoR)[2:]).upper()
-                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-                if len(hexStr) < 2:
-                    hexStr.insert(0,'00')
-                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+                photoR = int(((photo/0.625/10**4)/1.5)*4096)
+                strHex = "0x%0.4X" % photoR
+                strHex = strHex[2:]
+                hexStr = strHex[:2] + ' ' + strHex[2:]
+#                intensity = photo/0.625/10**6/1000
+#                vsensor = intensity*10**5
+#                photoR = int((vsensor/1.5)*4096)
+#                hexStr = str(hex(photoR)[2:]).upper()
+#                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
+#                if len(hexStr) < 2:
+#                    hexStr.insert(0,'00')
+#                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
 #                print ("Photo = ",photo, " ", hexStr)
                 return hexStr
             
@@ -187,9 +198,9 @@ class MsgCreator(object):
     def radiationToradiationR(self,radiation):
         # 70.85 Lux -> 255
         # rad = round((radR/4096.0*vref/2.0/10**5)*0.769*10**5*10**3,2)
-        #   Vsensor = (ADCvalue/4096) C Vref , Vref=1.5V
+        #   Vsensor = (ADCvalue/4096) × Vref , Vref=1.5V
         #   I = Vsensor / 100000
-        #   S1087-01 lx = 0.769 C 10^5 C I C 1000
+        #   S1087-01 lx = 0.769 × 10^5 × I × 1000
         
         lower = 0
         upper = 500
@@ -203,19 +214,23 @@ class MsgCreator(object):
             return "00 00"
         else:
             if isinstance(radiation,(int,float)):
-                intensity = radiation/0.769/10**5/1000
-                vsensor = intensity*10**5
-                radiationR = int((vsensor/1.5)*4096)
-                hexStr = str(hex(radiationR)[2:]).upper()
-                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-                if len(hexStr) < 2:
-                    hexStr.insert(0,'00')
-                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+                adcvalue = int((radiation/0.769/1000/1.5)*4096)
+                strHex = "0x%0.4X" % adcvalue
+                strHex = strHex[2:]
+                hexStr = strHex[:2] + ' ' + strHex[2:]
+#                intensity = radiation/0.769/10**5/1000
+#                vsensor = intensity*10**5
+#                radiationR = int((vsensor/1.5)*4096)
+#                hexStr = str(hex(radiationR)[2:]).upper()
+#                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
+#                if len(hexStr) < 2:
+#                    hexStr.insert(0,'00')
+#                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
                 return hexStr
         
     def temperatureTotemperatureR(self,temperature):
-        # 25.08 B:C -> 6468
-        # T = -39.6 + 0.01 C SOT, 3V & 14 bit in Celsius
+        # 25.08 ºC -> 6468
+        # T = -39.6 + 0.01 × SOT, 3V & 14 bit in Celsius
         
         lower = 0
         upper = 40
@@ -229,11 +244,15 @@ class MsgCreator(object):
             return "00 00"
         else:
             if isinstance(temperature,(int,float)):
-                hexStr = str(hex(int((temperature + 39.6)/0.01))[2:]).upper()
-                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-                if len(hexStr) < 2:
-                    hexStr.insert(0,'00')
-                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+                tempR = int((temperature + 39.6)/0.01)
+                strHex = "0x%0.4X" % tempR
+                strHex = strHex[2:]
+                hexStr = strHex[:2] + ' ' + strHex[2:]
+#                hexStr = str(hex(int((temperature + 39.6)/0.01))[2:]).upper()
+#                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
+#                if len(hexStr) < 2:
+#                    hexStr.insert(0,'00')
+#                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
                 return hexStr
         
     def humidityTohumidityR(self,humidity):
@@ -256,13 +275,17 @@ class MsgCreator(object):
             return "00 00"
         else:
             if isinstance(humidity,(int,float)):
+                humR = int((humidity/(100-2.05))*3081)
+                strHex = "0x%0.4X" % humR
+                strHex = strHex[2:]
+                hexStr = strHex[:2] + ' ' + strHex[2:]
                 # humLinear = humidity
-                humR = (humidity/(100-2.05))*3081
-                hexStr = str(hex(int(humR))[2:]).upper()
-                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-                if len(hexStr) < 2:
-                    hexStr.insert(0,'00')
-                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+#                humR =int((humidity/(100-2.05))*3081)
+#                hexStr = str(hex(int(humR))[2:]).upper()
+#                hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
+#                if len(hexStr) < 2:
+#                    hexStr.insert(0,'00')
+#                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
                 return hexStr
   
     def __init__(self):
@@ -419,7 +442,7 @@ def main():
         
     
 #    # int randomNum = min + (int)(Math.random() * (max - min));
-#    # O desvio padrC#o populacional ou amostral C) a raiz quadrada da variC"ncia 
+#    # O desvio padrão populacional ou amostral é a raiz quadrada da variância 
 #    mu, sigma = 1, 0.1 # mean and standard deviation
 #    
 #    lower, upper = 3.5, 6
