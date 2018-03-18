@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/python3.7
 ## /usr/local/bin/python3.7
 
 import time  
@@ -129,20 +129,28 @@ def main():
                     observer.stop()
                 observer.join()
             else:
+                global counter
+                global canvas
                 # ler do stdin
                 print ("ler do stdin")
+                
+                win = GraphicsWindow()
+                win.setTitle("RGB Matrix")
+                canvas = win.canvas()
+                canvas.setWidth(n_cells_per_side*n_pixeis)
+                canvas.setHeight(n_cells_per_side*n_pixeis)
+                counter = False
+                for i in range(n_cells_per_side*n_cells_per_side):
+                    x = int(i/n_cells_per_side)
+                    y = i%n_cells_per_side
+                    canvas.setColor(0,0,0)
+                    canvas.drawRectangle(x*n_pixeis,y*n_pixeis,n_pixeis,n_pixeis)
+                
                 for line in sys.stdin:
                     cells = arg_as_list(line)
                     if (len(cells) == (n_cells_per_side*n_cells_per_side)):
-                        global counter
-                        global canvas
-                        if counter:
-                            win = GraphicsWindow(n_cells_per_side*n_pixeis+1,n_cells_per_side*n_pixeis+1)
-                            win.setTitle("RGB Matrix")
-                            canvas = win.canvas()
-                            counter = False
-                        else:
-                            canvas.clear()
+                        
+                        canvas.clear()
                         
                         for i in range(n_cells_per_side*n_cells_per_side):
                             x = int(i/n_cells_per_side)
