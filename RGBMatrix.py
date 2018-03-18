@@ -132,7 +132,7 @@ def main():
                 global counter
                 global canvas
                 # ler do stdin
-                print ("ler do stdin")
+                # print ("ler do stdin")
                 
                 win = GraphicsWindow()
                 win.setTitle("RGB Matrix")
