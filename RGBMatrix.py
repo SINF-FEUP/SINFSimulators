@@ -157,7 +157,7 @@ def main():
                             y = i%n_cells_per_side
                             canvas.setColor(cells[i][0],cells[i][1],cells[i][2])
                             canvas.drawRectangle(x*n_pixeis,y*n_pixeis,n_pixeis,n_pixeis)
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
         else:
             raise IOError("File RGBMatrixConf.txt doesn't appear to exists.")
 if __name__ == "__main__":
