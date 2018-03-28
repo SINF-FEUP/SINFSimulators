@@ -12,6 +12,8 @@ In this repository we provide to all the students a working version of the C App
 
 This scenario is composed by two bedrooms and a living room, each with a heater and a mote (temperature, humidity and light sensors). This means that in total we have 3 actuators (3 heater) and 3 temperature sensors, 3 humidity sensors and 3 light sensors. For the implemented rules, there are 3 defined thresholds that will turn on and off the heater. These are defined in the sinf_application.c in a global variable called "temp_threshold". If the temperature surpasses this threshold, the heater will turn off, and vice-versa. For purposes of simplicity, the heater control is only dependent on the temperature sensors. As for the presentation of information, each room is depicted as a column in the RGBMatrix application, where the first line is the temperature sensor, the second one is the humidity sensor, the third is the light sensor and finally the fourth is the actuator. The color mapping for the temperature sensor is blue when the temperature is below threshold and red otherwise. For the heater, the color mapping is green when it is on, and red otherwise. The following image shows the mapping for all the cells in the RGBMatrix application:
 
+![alt text](https://github.com/SINF-FEUP/SINFSimulators/blob/master/rgbmatrix_working_version.png)
+
 # Required files
 
 In order to execute this working version you will need to following files:
