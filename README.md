@@ -14,6 +14,8 @@ This scenario is composed by two bedrooms and a living room, each with a heater 
 
 ![alt text](https://github.com/SINF-FEUP/SINFSimulators/blob/master/rgbmatrix_working_version.png)
 
+<img src="https://github.com/SINF-FEUP/SINFSimulators/blob/master/rgbmatrix_working_version.png" width="300">
+
 # Required files
 
 In order to execute this working version you will need to following files:
