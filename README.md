@@ -34,7 +34,7 @@ gcc -Wall -o "%e" "%f"
 
 Please replace this string for the following:
 
-gcc -Wall -o "%e" "%f" sinf_interface.o
+gcc -Wall -o "%e" "%f" sinf_interfaces.o
 
 Now, if you build your application is Geany IDE, you should be able to run it the same way as before. Finally, in order to execute the sinf_application, you should execute the following command in the terminal:
 
