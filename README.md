@@ -23,7 +23,8 @@ In order to execute this working version you will need to following files:
 - RGBMatrix.py
 - RGBMatrixConf.txt
 - sinf_application.c
-- sinf_interfaces.o
+- sinf_interfaces.o -> for Debian
+- sinf_interfaces_rpi.o -> for Raspberry Pi 3
 - sinf_interfaces.h
 
 # How to compile and build in Geany
@@ -32,9 +33,14 @@ The compilation remains the same, but in order to build you need to change the B
 
 gcc -Wall -o "%e" "%f"
 
-Please replace this string for the following:
+Please replace this string on the Debian VM for the following:
 
 gcc -Wall -o "%e" "%f" sinf_interfaces.o
+
+
+Please replace this string on the Raspberry Pi 3 for the following:
+
+gcc -Wall -o "%e" "%f" sinf_interfaces_rpi.o
 
 Now, if you build your application is Geany IDE, you should be able to run it the same way as before. Finally, in order to execute the sinf_application, you should execute the following command in the terminal:
 
