@@ -75,9 +75,9 @@ class MsgCreator(object):
         parser.add_argument('-f', action="store", dest="freq", type=int, nargs="+", help="Freq. in Hz")
         parser.add_argument('-c', action="store", dest="loop", type=int, nargs="+", help="Loop cycles")
 #        parser.add_argument('-s', action="store", dest="sensors", type=str, help="list of sensors [0- vref, 1- photo, 2- radiation, 3- temperature , 4- humidity]")
-        parser.add_argument("-s",action="store", dest="sensors", type=arg_as_list, default=[], nargs="+", 
-                            help='list of sensors: 0 vref 0..5V,\n 1 photo 0..3500 lux, 2 radiation 0..500 lux, 3 temperature 0..40 C , 4 humidity 0..100')
+        parser.add_argument("-s",action="store", dest="sensors", type=arg_as_list, default=[], nargs="+", help='list of sensors: 0 vref 0..5V,\n 1 photo 0..3500 lux, 2 radiation 0..500 lux, 3 temperature 0..40 C , 4 humidity 0..100')
         parser.add_argument("-d",action="store", dest="dist", type=arg_as_list, default=[], nargs="+", help="nested list, foreach sensor a list [type, min, max, stdev]")
+        parser.add_argument("-i",action="store", dest="indice", type=int, default=0, nargs="+", help="Start index for motes")
 #        parser.print_help()
 
         if os.path.exists('MsgCreatorConf.txt') == True:
@@ -297,7 +297,7 @@ class MsgCreator(object):
         self.testDist(self.res.dist[0])
         self.dist = self.res.dist[0]
         self.loop = self.res.loop[0]
-   
+        self.indice = self.res.indice
     
     
 def main():
@@ -355,8 +355,16 @@ def main():
 
     np.random.seed(int(time.time()))
     #ids = np.random.randint(1,65534,size=myMsgCreator.id,dtype=np.uint16)
-    ids = range(myMsgCreator.id+1)
-    ids = ids[1:]
+
+    if (myMsgCreator.indice == 0):
+        ids = range(myMsgCreator.id+1)
+        ids = ids[1:]
+    else:
+        print(myMsgCreator.indice[0])
+        print(myMsgCreator.id)
+        ids = np.linspace(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,myMsgCreator.id,dtype=int).tolist()
+        print(ids)
+
 #    print (ids)
 #    porra =""
 #    for i in range(len(ids)):
