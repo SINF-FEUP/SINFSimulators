@@ -360,10 +360,12 @@ def main():
         ids = range(myMsgCreator.id+1)
         ids = ids[1:]
     else:
-        print(myMsgCreator.indice[0])
-        print(myMsgCreator.id)
-        ids = np.linspace(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,myMsgCreator.id,dtype=int).tolist()
-        print(ids)
+        #print(myMsgCreator.indice[0])
+        #print(myMsgCreator.id)
+        #ids = np.linspace(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,myMsgCreator.id,dtype=int).tolist()
+        ids = range(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,1)
+        #print(ids2)
+        #print(ids)
 
 #    print (ids)
 #    porra =""
