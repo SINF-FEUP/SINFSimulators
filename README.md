@@ -23,7 +23,7 @@ In order to execute this working version you will need to following files:
 - RGBMatrix.py
 - RGBMatrixConf.txt
 - sinf_application.c
-- sinf_interfaces.o -> for Debian
+- sinf_interfaces.o
 - sinf_interfaces.h
 
 # How to compile and build in Geany / Terminal
