@@ -67,7 +67,7 @@ To that intent, you should use the <i>dump.sql</i> file to execute the DDL and D
 
 **Relational Model**
 
-So you can better understand how to develop the SQL queries, here you can find the relational model for the present database.
+So you can better understand how to develop the SQL queries, here you can find the relational model for the present database. Bold fields should be considered as primary keys in this scenario.
 
 Actuator (**act_id**, name, description)
 
@@ -75,17 +75,17 @@ Room (**name**, description)
 
 Sensor (**type**, description)
 
-Mote (**mote_id**, name, series, #name->Room)
+Mote (**mote_id**, name, series, #name->Room[NN])
 
 Sensor_mote (**#type->Sensor, #mote_id->Mote**)
 
-Rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor, #mote_id->Mote)
+Rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor[NN], #mote_id->Mote[NN])
 
-Measure (**m_id**, timestamp, value, #type->Sensor, #mote_id->Mote)
+Measure (**m_id**, timestamp, value, #type->Sensor[NN], #mote_id->Mote[NN])
 
 Actuator_room (**#act_id->Actuator, #name->Room**)
 
-State (**s_id**, timestamp, state, #act_id->Actuator, #name->Room)
+State (**s_id**, timestamp, state, #act_id->Actuator[NN], #name->Room[NN])
 
 
 
