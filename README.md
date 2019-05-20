@@ -79,7 +79,7 @@ Mote (**mote_id**, name, series, #name->Room[NN])
 
 Sensor_mote (**#type->Sensor, #mote_id->Mote**)
 
-Rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor[NN], #mote_id->Mote[NN])
+Rules (**rule_id**, operator, value, #act_id->Actuator[NN], #type->Sensor[NN], #mote_id->Mote[NN])
 
 Measure (**m_id**, timestamp, value, #type->Sensor[NN], #mote_id->Mote[NN])
 
