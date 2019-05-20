@@ -55,3 +55,38 @@ struct Measurements{
 struct Actuators{
 	int heater_on;
 };
+
+# SINF Database of Sprint #3
+
+**Database**
+
+In this Sprint #3 you are requested to develop a set of SQL queries to present information in a GUI regarding Sensor, Actuator, Configuration, Control Rules and Energy data. For those who have not successfully implemented a database with information, here you can find the DDL and DML corresponding to given C Application from Sprint #2.
+
+To that intent, you should use the <i>dump.sql</i> file to execute the DDL and DML, and create the database in PostgreSQL at db.fe.up.pt. The schema that will be created is named "has_test" with all the necessary data for Sprint #3.
+
+
+**Relational Model**
+
+So you can better understand how to develop the SQL queries, here you can find the relational model for the present database.
+
+Actuator (**act_id**, name, description)
+
+Room (**name**, description)
+
+Sensor (**type**, description)
+
+Mote (**mote_id**, name, series, #name->Room)
+
+Sensor_mote (**#type->Sensor, #mote_id->Mote**)
+
+Rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor, #mote_id->Mote)
+
+Measure (**m_id**, timestamp, value, #type->Sensor, #mote_id->Mote)
+
+Actuator_room (**#act_id->Actuator, #name->Room**)
+
+State (**s_id**, timestamp, state, #act_id->Actuator, #name->Room)
+
+
+
+
