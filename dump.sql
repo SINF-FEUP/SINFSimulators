@@ -23,8 +23,6 @@ SET row_security = off;
 CREATE SCHEMA has_test;
 
 
-ALTER SCHEMA has_test OWNER TO sinfdoc;
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -40,11 +38,6 @@ CREATE TABLE has_test.actuator (
 );
 
 
-ALTER TABLE has_test.actuator OWNER TO sinfdoc;
-
---
--- Name: actuator_act_id_seq; Type: SEQUENCE; Schema: has_test; Owner: sinfdoc
---
 
 CREATE SEQUENCE has_test.actuator_act_id_seq
     START WITH 1
@@ -54,7 +47,6 @@ CREATE SEQUENCE has_test.actuator_act_id_seq
     CACHE 1;
 
 
-ALTER TABLE has_test.actuator_act_id_seq OWNER TO sinfdoc;
 
 --
 -- Name: actuator_act_id_seq; Type: SEQUENCE OWNED BY; Schema: has_test; Owner: sinfdoc
@@ -73,7 +65,6 @@ CREATE TABLE has_test.actuator_room (
 );
 
 
-ALTER TABLE has_test.actuator_room OWNER TO sinfdoc;
 
 --
 -- Name: measure; Type: TABLE; Schema: has_test; Owner: sinfdoc
@@ -88,7 +79,6 @@ CREATE TABLE has_test.measure (
 );
 
 
-ALTER TABLE has_test.measure OWNER TO sinfdoc;
 
 --
 -- Name: measure_m_id_seq; Type: SEQUENCE; Schema: has_test; Owner: sinfdoc
@@ -102,7 +92,7 @@ CREATE SEQUENCE has_test.measure_m_id_seq
     CACHE 1;
 
 
-ALTER TABLE has_test.measure_m_id_seq OWNER TO sinfdoc;
+
 
 --
 -- Name: measure_m_id_seq; Type: SEQUENCE OWNED BY; Schema: has_test; Owner: sinfdoc
@@ -123,8 +113,6 @@ CREATE TABLE has_test.mote (
 );
 
 
-ALTER TABLE has_test.mote OWNER TO sinfdoc;
-
 --
 -- Name: mote_mote_id_seq; Type: SEQUENCE; Schema: has_test; Owner: sinfdoc
 --
@@ -136,8 +124,6 @@ CREATE SEQUENCE has_test.mote_mote_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE has_test.mote_mote_id_seq OWNER TO sinfdoc;
 
 --
 -- Name: mote_mote_id_seq; Type: SEQUENCE OWNED BY; Schema: has_test; Owner: sinfdoc
@@ -156,8 +142,6 @@ CREATE TABLE has_test.room (
 );
 
 
-ALTER TABLE has_test.room OWNER TO sinfdoc;
-
 --
 -- Name: rule; Type: TABLE; Schema: has_test; Owner: sinfdoc
 --
@@ -172,8 +156,6 @@ CREATE TABLE has_test.rule (
 );
 
 
-ALTER TABLE has_test.rule OWNER TO sinfdoc;
-
 --
 -- Name: rule_rule_id_seq; Type: SEQUENCE; Schema: has_test; Owner: sinfdoc
 --
@@ -186,7 +168,6 @@ CREATE SEQUENCE has_test.rule_rule_id_seq
     CACHE 1;
 
 
-ALTER TABLE has_test.rule_rule_id_seq OWNER TO sinfdoc;
 
 --
 -- Name: rule_rule_id_seq; Type: SEQUENCE OWNED BY; Schema: has_test; Owner: sinfdoc
@@ -205,8 +186,6 @@ CREATE TABLE has_test.sensor (
 );
 
 
-ALTER TABLE has_test.sensor OWNER TO sinfdoc;
-
 --
 -- Name: sensor_mote; Type: TABLE; Schema: has_test; Owner: sinfdoc
 --
@@ -217,7 +196,6 @@ CREATE TABLE has_test.sensor_mote (
 );
 
 
-ALTER TABLE has_test.sensor_mote OWNER TO sinfdoc;
 
 --
 -- Name: state; Type: TABLE; Schema: has_test; Owner: sinfdoc
@@ -232,8 +210,6 @@ CREATE TABLE has_test.state (
 );
 
 
-ALTER TABLE has_test.state OWNER TO sinfdoc;
-
 --
 -- Name: state_s_id_seq; Type: SEQUENCE; Schema: has_test; Owner: sinfdoc
 --
@@ -246,7 +222,6 @@ CREATE SEQUENCE has_test.state_s_id_seq
     CACHE 1;
 
 
-ALTER TABLE has_test.state_s_id_seq OWNER TO sinfdoc;
 
 --
 -- Name: state_s_id_seq; Type: SEQUENCE OWNED BY; Schema: has_test; Owner: sinfdoc
