@@ -10,9 +10,6 @@ import scipy.stats as stats
 from scipy.stats import norm
 import os.path
 
-import matplotlib
-import matplotlib.pyplot as plt
-
 header1 = "7E 45 00 FF FF"
 header2 = "0A 3F 0C"
 
