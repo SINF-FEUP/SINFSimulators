@@ -10,6 +10,11 @@ import scipy.stats as stats
 from scipy.stats import norm
 import os.path
 
+import matplotlib
+import matplotlib.pyplot as plt
+
+header1 = "7E 45 00 FF FF"
+header2 = "0A 3F 0C"
 
 def parametric_circle(t,xc,yc,R):
     x = xc + R*np.cos(t)
@@ -53,7 +58,6 @@ def uniform(Min,Max,sigma,N):
                 ys.append(Max+np.random.uniform(-sigma,sigma))
         return ys
 
-
 def arg_as_list(s):
         s = str(s)
         v = ast.literal_eval(s)
@@ -64,6 +68,7 @@ def arg_as_list(s):
 #            if not isinstance(i,(int,float)):
 #                raise argparse.ArgumentTypeError("The list should not cointain any literal! "% (s))
         return v
+
 class MsgCreator(object):
          
     ids = []
@@ -81,30 +86,30 @@ class MsgCreator(object):
 #        parser.print_help()
 
         if os.path.exists('MsgCreatorConf.txt') == True:
-                try:
-                        my_file = open('MsgCreatorConf.txt','r')
-                        first_line = my_file.readline().rstrip()
-                        #print(first_line)
-                        arglist = first_line.split( )
-                        #arglist.append(sys.argv[1])
-                        #print(arglist)
-                        #print (sys.argv[1])
-                        #print(arglist)
-                        res = parser.parse_args(arglist)
-                        return res
-                except IOError:
-                        print("The file \"RGBMatrixConf.txt\" doesn't exist!")
+            try:
+                    my_file = open('MsgCreatorConf.txt','r')
+                    first_line = my_file.readline().rstrip()
+                    #print(first_line)
+                    arglist = first_line.split( )
+                    #arglist.append(sys.argv[1])
+                    #print(arglist)
+                    #print (sys.argv[1])
+                    #print(arglist)
+                    res = parser.parse_args(arglist)
+                    return res
+            except IOError:
+                    print("The file \"MsgCreatorConf.txt\" doesn't exist!")
         else:
-                results = parser.parse_args()
-                return results
+
+            results = parser.parse_args()
+            return results
            
     def testSensors(self, lista):
         for i in lista:
             if int(i) not in range(5):
                 raise argparse.ArgumentTypeError("Sensor \"%s\" not in the list of sensors."%(i))
         return list(collections.OrderedDict.fromkeys(lista))
-        
-    
+
     def testDist(self, llista):
         if len(llista) != len(self.sensors):
             raise argparse.ArgumentTypeError("The number of dists = \"%s\" is diferent of the number of sensors = \"%s\"."%(len(llista),len(self.sensors)))
@@ -116,18 +121,12 @@ class MsgCreator(object):
             for k in i[1:]:
                 if not isinstance(k,(int,float)):
                     raise argparse.ArgumentTypeError("Argument \"%s\" in dist is not an integer or float" % (k))
-#            if (i[0]>i[1]):
-#                raise argparse.ArgumentTypeError("min > max in dist \"%s\"" % (i))
-    
+
     def idToidR(self, moteId):
         strHex = "0x%0.4X" % moteId
         strHex = strHex[2:]
         hexStr = strHex[:2] + ' ' + strHex[2:]
-#        hexStr = str(hex(moteId)[2:]).upper()
-#        hexStr = [hexStr[i:i+2] for i in range(0,len(hexStr),2)]
-#        if len(hexStr) < 2:
-#                hexStr.insert(0,'00')
-#        hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
+
         return hexStr
     
     # Read: https://www.advanticsys.com/wiki/index.php?title=TestCM5000
@@ -158,8 +157,7 @@ class MsgCreator(object):
 #            hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
             
             return hexStr
-            
-    
+
     def photoTophotoR(self,photo):
         # 462.95 Lux -> 205
         # photo = round((photoR/4096.0*vref/2.0/10**5)*0.625*10**6*10**3,2)
@@ -193,8 +191,7 @@ class MsgCreator(object):
 #                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
 #                print ("Photo = ",photo, " ", hexStr)
                 return hexStr
-            
-                
+
     def radiationToradiationR(self,radiation):
         # 70.85 Lux -> 255
         # rad = round((radR/4096.0*vref/2.0/10**5)*0.769*10**5*10**3,2)
@@ -287,168 +284,205 @@ class MsgCreator(object):
 #                    hexStr.insert(0,'00')
 #                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
                 return hexStr
-  
+
+    def updateParser(self, _res):
+        self.id = _res.id[0]
+        self.lsize = _res.lsize[0]
+        self.freq = _res.freq[0]
+        self.sensors = self.testSensors(self.res.sensors[0])
+        self.testDist(_res.dist[0])
+        self.dist = _res.dist[0]
+        self.loop = _res.loop[0]
+        self.indice = _res.indice
+
     def __init__(self):
         self.res = self.parser()
-        self.id = self.res.id[0]
-        self.lsize = self.res.lsize[0]
-        self.freq = self.res.freq[0]
-        self.sensors = self.testSensors(self.res.sensors[0])
-        self.testDist(self.res.dist[0])
-        self.dist = self.res.dist[0]
-        self.loop = self.res.loop[0]
-        self.indice = self.res.indice
+        self.updateParser(self.res)
+
     
-    
+
+def printMessage(_hashmap, _it, _myMsgCreator, _ids):
+
+    str0 = ''
+    str0 += header1
+    # id
+    str0 += ' ' + _myMsgCreator.idToidR(_ids[_it % _myMsgCreator.id])
+    str0 += ' ' + header2
+
+    # vref
+    _sens = 0
+    if _sens not in _myMsgCreator.sensors:
+        str0 += ' 00 00'
+    else:
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        else:
+            _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
+            _data = _hashmap[_sens][0]
+
+        str0 += ' ' + _myMsgCreator.vrefTovrefR(_data)
+        #print("Voltage", _data)
+
+    # photo
+    _sens = 1
+    if _sens not in _myMsgCreator.sensors:
+        str0 += ' 00 00'
+    else:
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        else:
+            _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
+            _data = _hashmap[_sens][0]
+
+        str0 += ' ' + _myMsgCreator.photoTophotoR(_data)
+        #print("Light", _data)
+
+    # radiation
+    _sens = 2
+    if _sens not in _myMsgCreator.sensors:
+        str0 += ' 00 00'
+    else:
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        else:
+            _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
+            _data = _hashmap[_sens][0]
+
+        str0 += ' ' + _myMsgCreator.radiationToradiationR(_data)
+        #print("Radiation", _data)
+
+    # temperature
+    _sens = 3
+    if _sens not in _myMsgCreator.sensors:
+        str0 += ' 00 00'
+    else:
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        else:
+            _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
+            _data = _hashmap[_sens][0]
+
+        str0 += ' ' + _myMsgCreator.temperatureTotemperatureR(_data)
+        #print("Temperature", _data)
+
+    # humidity
+    _sens = 4
+    if _sens not in _myMsgCreator.sensors:
+        str0 += ' 00 00'
+    else:
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        else:
+            _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
+            _data = _hashmap[_sens][0]
+
+        str0 += ' ' + _myMsgCreator.humidityTohumidityR(_data)
+        #print("Humidity", _data)
+
+    str0 += ' ' + _myMsgCreator.idToidR(np.random.randint(1, 65534, dtype=np.uint16))  # 2 Bytes CRC
+    str0 += ' ' + "7E"
+
+    return str0
+
+def generate_hashmap(_myMsgCreator, old_hashmap = None):
+
+    _hashmap = {}
+    for i in range(len(_myMsgCreator.sensors)):
+        # Uniform type of curve
+        if _myMsgCreator.dist[i][0] == 'U':
+            Min, Max, Sigma = _myMsgCreator.dist[i][1], _myMsgCreator.dist[i][2], _myMsgCreator.dist[i][3]
+            data = uniform(Min, Max, Sigma, _myMsgCreator.lsize * _myMsgCreator.id)
+            # print (len(data)," ",myMsgCreator.lsize)
+            _hashmap[_myMsgCreator.sensors[i]] = data
+        # Gaussian type of curve
+        if _myMsgCreator.dist[i][0] == 'C':
+            Min, Max, Sigma = _myMsgCreator.dist[i][1], _myMsgCreator.dist[i][2], _myMsgCreator.dist[i][3]
+            data = circular(Min, Max, Sigma, _myMsgCreator.lsize * _myMsgCreator.id)
+            # print (len(data)," ",myMsgCreator.lsize)
+            _hashmap[_myMsgCreator.sensors[i]] = data
+        # Gaussian type of curve
+        if _myMsgCreator.dist[i][0] == 'L':
+            Min, Max, Direc = _myMsgCreator.dist[i][1], _myMsgCreator.dist[i][2], _myMsgCreator.dist[i][3]
+            Delta = (Max-Min)/ (_myMsgCreator.lsize * _myMsgCreator.id)
+
+            if Direc == 1:
+                # first time generating
+                if old_hashmap == None:
+                    data = [Min , Delta]
+                # subsequent time generating
+                else:
+                    data = [old_hashmap[_myMsgCreator.sensors[i]][0], Delta]
+            elif Direc == -1:
+                if old_hashmap == None:
+                    data = [Max, -Delta]
+                else:
+                    data = [old_hashmap[_myMsgCreator.sensors[i]][0], -Delta]
+            else:
+                print("Wrong definition of Linear behavior. ASC or DESC must be used.")
+
+            _hashmap[_myMsgCreator.sensors[i]] = data
+
+            '''
+            temp = np.linspace(Max, Min, 100)
+            plt.plot(range(100),temp)
+            plt.ylabel('Humidity (%)')
+            plt.xlabel('Message')
+            plt.show()
+            '''
+
+    return _hashmap
+
 def main():
-    myMsgCreator = MsgCreator();
-    
-#    print (myMsgCreator.lsize)
-#    print (myMsgCreator.freq)
-#    print (myMsgCreator.sensors)
-#    print (myMsgCreator.dist)
- 
-    
-    hashmap = {}
-    for i in range(len(myMsgCreator.sensors)):
-#        mu, sigma = myMsgCreator.dist[i][0], myMsgCreator.dist[i][1]
-#        lower, upper = 0, 0
-#        # [0- vref [0..5 V], 1- photo, 2- radiation, 3- temperature , 4- humidity]
-#        if myMsgCreator.sensors[i] == 0:
-#            lower = 0
-#            upper = 5
-#        else:
-#            if myMsgCreator.sensors[i] == 1:
-#                lower = 0
-#                upper = 3500
-#            else:
-#                if myMsgCreator.sensors[i] == 2:
-#                    lower = 0
-#                    upper = 500
-#                else:
-#                    if myMsgCreator.sensors[i] == 3:
-#                        lower = 0
-#                        upper = 40
-#                    else:
-#                        if myMsgCreator.sensors[i] == 4:
-#                            lower = 0
-#                            upper = 100
-        if myMsgCreator.dist[i][0] == 'U':
-                Min, Max, Sigma = myMsgCreator.dist[i][1], myMsgCreator.dist[i][2], myMsgCreator.dist[i][3]
-                data = uniform(Min,Max,Sigma,myMsgCreator.lsize*myMsgCreator.id)
-                #print (len(data)," ",myMsgCreator.lsize)
-                hashmap[myMsgCreator.sensors[i]] = data
-        if myMsgCreator.dist[i][0] == 'C':
-                Min, Max, Sigma = myMsgCreator.dist[i][1], myMsgCreator.dist[i][2], myMsgCreator.dist[i][3]
-                data = circular(Min,Max,Sigma,myMsgCreator.lsize*myMsgCreator.id)
-                #print (len(data)," ",myMsgCreator.lsize)
-                hashmap[myMsgCreator.sensors[i]] = data
-        #hashmap[myMsgCreator.sensors[i]] = stats.truncnorm.rvs((lower-mu)/sigma,(upper-mu)/sigma,loc=mu,scale=sigma,size=myMsgCreator.lsize).tolist()
-#        print (hashmap.keys())
-#        print ("Sensor %s Min %s Max %s Mean %s Stdev %s"%(myMsgCreator.sensors[i],lower, upper, mu, sigma))
-#        print(hashmap[myMsgCreator.sensors[i]])
-#        print ()
-    
-    header1 = "7E 45 00 FF FF"
-    header2 = "0A 3F 0C"
-    
-
     np.random.seed(int(time.time()))
-    #ids = np.random.randint(1,65534,size=myMsgCreator.id,dtype=np.uint16)
 
+    myMsgCreator = MsgCreator()
+    prev_res = None
+
+    # Generate previously all curves
+    hashmap = generate_hashmap(myMsgCreator)
+
+    # Ids
     if (myMsgCreator.indice == 0):
         ids = range(myMsgCreator.id+1)
         ids = ids[1:]
     else:
-        #print(myMsgCreator.indice[0])
-        #print(myMsgCreator.id)
-        #ids = np.linspace(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,myMsgCreator.id,dtype=int).tolist()
         ids = range(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,1)
-        #print(ids2)
-        #print(ids)
 
-#    print (ids)
-#    porra =""
-#    for i in range(len(ids)):
-#        porra += ' '+myMsgCreator.idToidR(ids[i])
-#    print (porra)
-    
+    # Infinite loop
     if (myMsgCreator.loop == 0):
         while 1:
             for i in range(myMsgCreator.lsize*myMsgCreator.id):
-                str0=''
-                str0 += header1
-                #id
-                str0 += ' '+myMsgCreator.idToidR(ids[i%myMsgCreator.id])
-                str0+=' '+header2
-                #vref
-                if 0 not in myMsgCreator.sensors:
-                    str0+=' 00 00'
-                else:
-                   str0 += ' '+myMsgCreator.vrefTovrefR(hashmap[0][i])
-                #photo
-                if 1 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.photoTophotoR(hashmap[1][i])
-                #radiation
-                if 2 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.radiationToradiationR(hashmap[2][i])
-                #temperature
-                if 3 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.temperatureTotemperatureR(hashmap[3][i])
-                #humidity
-                if 4 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.humidityTohumidityR(hashmap[4][i])
-                str0 +=' '+myMsgCreator.idToidR(np.random.randint(1,65534,dtype=np.uint16)) #2 Bytes CRC
-                str0 +=' '+"7E"
+
+                str0 = printMessage(hashmap,i,myMsgCreator,ids)
+
                 print(str0)
                 time.sleep(1.0/(myMsgCreator.freq*myMsgCreator.id))
+
+                ############################################
+                ############################################
+
+                act = myMsgCreator.parser()
+
+                if prev_res != act and prev_res != None:
+                    myMsgCreator.updateParser(act)
+                    hashmap = generate_hashmap(myMsgCreator, hashmap)
+
+                prev_res = act
+
     else:
         for c in range (myMsgCreator.loop):
             for i in range(myMsgCreator.lsize*myMsgCreator.id):
-                str0=''
-                str0 += header1
-                #id
-                str0 += ' '+myMsgCreator.idToidR(ids[i%myMsgCreator.id])
-                str0+=' '+header2
-                #vref
-                if 0 not in myMsgCreator.sensors:
-                    str0+=' 00 00'
-                else:
-                   str0 += ' '+myMsgCreator.vrefTovrefR(hashmap[0][i])
-                #photo
-                if 1 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.photoTophotoR(hashmap[1][i])
-                #radiation
-                if 2 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.radiationToradiationR(hashmap[2][i])
-                #temperature
-                if 3 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.temperatureTotemperatureR(hashmap[3][i])
-                #humidity
-                if 4 not in myMsgCreator.sensors:
-                    str0 +=' 00 00'
-                else:
-                    str0 += ' '+myMsgCreator.humidityTohumidityR(hashmap[4][i])
-                str0 +=' '+myMsgCreator.idToidR(np.random.randint(1,65534,dtype=np.uint16)) #2 Bytes CRC
-                str0 +=' '+"7E"
-                print(str0)
-                time.sleep(1.0/(myMsgCreator.freq*myMsgCreator.id))  
 
-                 
+                str0 = printMessage(hashmap, i, myMsgCreator, ids)
+
+                print(str0)
+                time.sleep(1.0/(myMsgCreator.freq*myMsgCreator.id))
+
+                ############################################
+                ############################################
+
+                act = myMsgCreator.parser()
+
+                if prev_res != act and prev_res != None:
+                    myMsgCreator.updateParser(act)
+                    hashmap = generate_hashmap(myMsgCreator, hashmap)
+
+                prev_res = act
         
     
 #    # int randomNum = min + (int)(Math.random() * (max - min));
