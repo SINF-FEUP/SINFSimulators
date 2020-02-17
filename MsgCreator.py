@@ -9,9 +9,31 @@ import numpy as np
 import scipy.stats as stats
 from scipy.stats import norm
 import os.path
+import matplotlib.animation as animation
+
+import matplotlib
+import matplotlib.pyplot as plt
 
 header1 = "7E 45 00 FF FF"
 header2 = "0A 3F 0C"
+
+_voltage = []
+_temperature = []
+_humidity = []
+_light = []
+_current = []
+
+#########
+# Init variables
+prev_res = None
+myMsgCreator = None
+hashmap = None
+ids = None
+
+#########
+# Plots
+fig = None
+axs = None
 
 def parametric_circle(t,xc,yc,R):
     x = xc + R*np.cos(t)
@@ -306,75 +328,81 @@ def printMessage(_hashmap, _it, _myMsgCreator, _ids):
     str0 += ' ' + _myMsgCreator.idToidR(_ids[_it % _myMsgCreator.id])
     str0 += ' ' + header2
 
+    _data_voltage = None
+    _data_temperature = None
+    _data_humidity = None
+    _data_light = None
+    _data_current = None
+
     # vref
     _sens = 0
     if _sens not in _myMsgCreator.sensors:
         str0 += ' 00 00'
     else:
-        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data_voltage = _hashmap[_sens][_it]
         else:
             _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
-            _data = _hashmap[_sens][0]
+            _data_voltage = _hashmap[_sens][0]
 
-        str0 += ' ' + _myMsgCreator.vrefTovrefR(_data)
-        #print("Voltage", _data)
+        str0 += ' ' + _myMsgCreator.vrefTovrefR(_data_voltage)
+        #print("Voltage", _data_voltage)
 
     # photo
     _sens = 1
     if _sens not in _myMsgCreator.sensors:
         str0 += ' 00 00'
     else:
-        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data_light = _hashmap[_sens][_it]
         else:
             _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
-            _data = _hashmap[_sens][0]
+            _data_light = _hashmap[_sens][0]
 
-        str0 += ' ' + _myMsgCreator.photoTophotoR(_data)
-        #print("Light", _data)
+        str0 += ' ' + _myMsgCreator.photoTophotoR(_data_light)
+        #print("Light", _data_light)
 
     # radiation
     _sens = 2
     if _sens not in _myMsgCreator.sensors:
         str0 += ' 00 00'
     else:
-        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data_current = _hashmap[_sens][_it]
         else:
             _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
-            _data = _hashmap[_sens][0]
+            _data_current = _hashmap[_sens][0]
 
-        str0 += ' ' + _myMsgCreator.radiationToradiationR(_data)
-        #print("Radiation", _data)
+        str0 += ' ' + _myMsgCreator.radiationToradiationR(_data_current)
+        #print("Radiation", _data_current)
 
     # temperature
     _sens = 3
     if _sens not in _myMsgCreator.sensors:
         str0 += ' 00 00'
     else:
-        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data_temperature = _hashmap[_sens][_it]
         else:
             _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
-            _data = _hashmap[_sens][0]
+            _data_temperature = _hashmap[_sens][0]
 
-        str0 += ' ' + _myMsgCreator.temperatureTotemperatureR(_data)
-        #print("Temperature", _data)
+        str0 += ' ' + _myMsgCreator.temperatureTotemperatureR(_data_temperature)
+        #print("Temperature", _data_temperature)
 
     # humidity
     _sens = 4
     if _sens not in _myMsgCreator.sensors:
         str0 += ' 00 00'
     else:
-        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data = _hashmap[_sens][_it]
+        if _myMsgCreator.dist[_myMsgCreator.sensors.index(_sens)][0] != 'L': _data_humidity = _hashmap[_sens][_it]
         else:
             _hashmap[_sens][0] = _hashmap[_sens][0] + _hashmap[_sens][1]
-            _data = _hashmap[_sens][0]
+            _data_humidity = _hashmap[_sens][0]
 
-        str0 += ' ' + _myMsgCreator.humidityTohumidityR(_data)
-        #print("Humidity", _data)
+        str0 += ' ' + _myMsgCreator.humidityTohumidityR(_data_humidity)
+        #print("Humidity", _data_humidity)
 
     str0 += ' ' + _myMsgCreator.idToidR(np.random.randint(1, 65534, dtype=np.uint16))  # 2 Bytes CRC
     str0 += ' ' + "7E"
 
-    return str0
+    return str0, _data_voltage, _data_temperature, _data_humidity, _data_light, _data_current
 
 def generate_hashmap(_myMsgCreator, old_hashmap = None):
 
@@ -424,11 +452,84 @@ def generate_hashmap(_myMsgCreator, old_hashmap = None):
 
     return _hashmap
 
+def animate_temp(i):
+
+    global prev_res
+    global myMsgCreator
+    global hashmap
+    global ids
+    global axs
+
+    str0, _data_v, _data_t, _data_h, _data_l, _data_c = printMessage(hashmap, i, myMsgCreator, ids)
+    print(str0)
+
+    if (i % myMsgCreator.id) == 0:
+
+        _voltage.append(_data_v)
+        _temperature.append(_data_t)
+        _humidity.append(_data_h)
+        _light.append(_data_l)
+        _current.append(_data_c)
+
+        iter = 0
+
+        data_size = myMsgCreator.lsize
+
+        for _plot in myMsgCreator.sensors:
+
+            if _plot == 0:
+                label = "Voltage"
+                temp_array = _voltage
+            elif _plot == 1:
+                label = "Light"
+                temp_array = _light
+            elif _plot == 2:
+                label = "Current"
+                temp_array = _current
+            elif _plot == 3:
+                label = "Temperature"
+                temp_array = _temperature
+            elif _plot == 4:
+                label = "Humidity"
+                temp_array = _humidity
+            else: continue
+
+            if len(temp_array) > data_size:
+                limit = len(temp_array) - data_size
+                temp_array = temp_array[limit:-1]
+
+            # Draw x and y lists
+            axs[iter].clear()
+            axs[iter].set_xlabel('Steps')
+            axs[iter].set_ylabel(label)
+            axs[iter].plot(range(len(temp_array)), temp_array)
+
+            iter += 1
+
+        ############################################
+        ############################################
+
+        act = myMsgCreator.parser()
+
+        if prev_res != act and prev_res != None:
+            myMsgCreator.updateParser(act)
+            hashmap = generate_hashmap(myMsgCreator, hashmap)
+
+        prev_res = act
+
 def main():
-    np.random.seed(int(time.time()))
+    global prev_res
+    global myMsgCreator
+    global hashmap
+    global ids
+    global axs
+    global fig
+
+    #np.random.seed(int(time.time()))
 
     myMsgCreator = MsgCreator()
-    prev_res = None
+
+    fig, axs = plt.subplots(1, len(myMsgCreator.sensors))
 
     # Generate previously all curves
     hashmap = generate_hashmap(myMsgCreator)
@@ -440,35 +541,24 @@ def main():
     else:
         ids = range(myMsgCreator.indice[0],myMsgCreator.indice[0]+myMsgCreator.id,1)
 
-    # Infinite loop
-    if (myMsgCreator.loop == 0):
-        while 1:
-            for i in range(myMsgCreator.lsize*myMsgCreator.id):
+    if (myMsgCreator.loop == 1):
+        ##############################
+        # Animation
+        #print("Interval" , int((1.0 / (myMsgCreator.freq * myMsgCreator.id))*1000) , "frames",(myMsgCreator.lsize * myMsgCreator.id))
 
-                str0 = printMessage(hashmap,i,myMsgCreator,ids)
+        interval = int((1.0 / (myMsgCreator.freq * myMsgCreator.id))*1000)
+        frames = myMsgCreator.lsize * myMsgCreator.id
 
-                print(str0)
-                time.sleep(1.0/(myMsgCreator.freq*myMsgCreator.id))
-
-                ############################################
-                ############################################
-
-                act = myMsgCreator.parser()
-
-                if prev_res != act and prev_res != None:
-                    myMsgCreator.updateParser(act)
-                    hashmap = generate_hashmap(myMsgCreator, hashmap)
-
-                prev_res = act
-
+        ani = animation.FuncAnimation(fig, animate_temp, frames=frames, interval=interval, repeat=True)
+        plt.show()
     else:
-        for c in range (myMsgCreator.loop):
-            for i in range(myMsgCreator.lsize*myMsgCreator.id):
+        while 1:
+            for i in range(myMsgCreator.lsize * myMsgCreator.id):
 
-                str0 = printMessage(hashmap, i, myMsgCreator, ids)
+                str0,_,_,_,_,_ = printMessage(hashmap, i, myMsgCreator, ids)
 
                 print(str0)
-                time.sleep(1.0/(myMsgCreator.freq*myMsgCreator.id))
+                time.sleep(1.0 / (myMsgCreator.freq * myMsgCreator.id))
 
                 ############################################
                 ############################################
@@ -480,7 +570,8 @@ def main():
                     hashmap = generate_hashmap(myMsgCreator, hashmap)
 
                 prev_res = act
-        
+
+
     
 #    # int randomNum = min + (int)(Math.random() * (max - min));
 #    # O desvio padrão populacional ou amostral é a raiz quadrada da variância 
@@ -495,7 +586,7 @@ def main():
 #    print (s,"\n",min(s), max(s))
 
 
-    
+
 
 if __name__ == "__main__":
     main()
