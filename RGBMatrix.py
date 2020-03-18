@@ -1,5 +1,5 @@
-#!/usr/bin/python3.7
-## /usr/local/bin/python3.7
+#!/usr/bin/python3
+## /usr/local/bin/python3
 
 import time  
 from watchdog.observers import Observer  
@@ -140,24 +140,36 @@ def main():
                 canvas.setWidth(n_cells_per_side*n_pixeis)
                 canvas.setHeight(n_cells_per_side*n_pixeis)
                 counter = False
+
+                array = []
                 for i in range(n_cells_per_side*n_cells_per_side):
                     x = int(i/n_cells_per_side)
                     y = i%n_cells_per_side
+
                     canvas.setColor(0,0,0)
-                    canvas.drawRectangle(x*n_pixeis,y*n_pixeis,n_pixeis,n_pixeis)
+                    array.append(canvas.drawRectangle(x*n_pixeis,y*n_pixeis,n_pixeis,n_pixeis))
                 
                 for line in sys.stdin:
                     cells = arg_as_list(line)
                     if (len(cells) == (n_cells_per_side*n_cells_per_side)):
                         
-                        canvas.clear()
+                        # canvas.clear()
                         
                         for i in range(n_cells_per_side*n_cells_per_side):
                             x = int(i/n_cells_per_side)
                             y = i%n_cells_per_side
-                            canvas.setColor(cells[i][0],cells[i][1],cells[i][2])
-                            canvas.drawRectangle(x*n_pixeis,y*n_pixeis,n_pixeis,n_pixeis)
+
+                            color = "#%02X%02X%02X" % (cells[i][0], cells[i][1], cells[i][2])
+
+                            canvas._tkcanvas.itemconfig(array[i], fill=color, outline=color)
+
+                            #canvas.setColor(cells[i][0],cells[i][1],cells[i][2])
+                            #canvas.drawRectangle(x*n_pixeis,y*n_pixeis,n_pixeis,n_pixeis)
+                            
+                        canvas._tkcanvas.update_idletasks()
                     #time.sleep(0.5)
+                    else:
+                        print("Error", len(cells), n_cells_per_side * n_cells_per_side)
         else:
             raise IOError("File RGBMatrixConf.txt doesn't appear to exists.")
 if __name__ == "__main__":
