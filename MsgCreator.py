@@ -50,16 +50,16 @@ def circular(Min,Max,sigma,N):
     yc = 0.0
     start_point = (xc + R*np.cos(0), yc + R*np.sin(0))
     end_point   = (xc + R*np.cos(np.pi), yc + R*np.sin(np.pi))
-    
-    
+
+
     start_t = inv_parametric_circle(start_point[0], xc, R)
     end_t   = inv_parametric_circle(end_point[0], xc, R)
-    
+
     # step in angle
     arc_T = np.linspace(start_t, end_t, N)
     ys = []
     for i in range (len(arc_T)):
-        ys.append((Max-sigma-(Min+sigma))*np.sin(arc_T[i])+Min+sigma +np.random.uniform(-sigma,sigma))          
+        ys.append((Max-sigma-(Min+sigma))*np.sin(arc_T[i])+Min+sigma +np.random.uniform(-sigma,sigma))
     return ys
 
 def uniform(Min,Max,sigma,N):
@@ -67,7 +67,7 @@ def uniform(Min,Max,sigma,N):
         ys = []
         for i in range(3):
                 x = range(int(N/3))
-                if i in [0,2]:         
+                if i in [0,2]:
                         y =  [Min+np.random.uniform(-sigma,sigma) for i in x]
                         ys.extend(y)
                 if i == 1:
@@ -89,7 +89,7 @@ def arg_as_list(s):
         return v
 
 class MsgCreator(object):
-         
+
     ids = []
     def parser(self):
         parser = argparse.ArgumentParser('Msg Creator')
@@ -107,7 +107,9 @@ class MsgCreator(object):
         if os.path.exists('MsgCreatorConf.txt') == True:
             try:
                     my_file = open('MsgCreatorConf.txt','r')
-                    first_line = my_file.readline().rstrip()
+                    first_line = ""
+                    while first_line == "":
+                        first_line = my_file.readline().rstrip()
                     #print(first_line)
                     arglist = first_line.split( )
                     #arglist.append(sys.argv[1])
@@ -122,7 +124,7 @@ class MsgCreator(object):
 
             results = parser.parse_args()
             return results
-           
+
     def testSensors(self, lista):
         for i in lista:
             if int(i) not in range(5):
@@ -147,20 +149,20 @@ class MsgCreator(object):
         hexStr = strHex[:2] + ' ' + strHex[2:]
 
         return hexStr
-    
+
     # Read: https://www.advanticsys.com/wiki/index.php?title=TestCM5000
     def vrefTovrefR(self,vref):
         # 2.96V -> 4046
         # Voltage = value/4096 × Vref x 2, Vref = 1.5V
-        
+
         lower = 0.0
         upper = 5.0
-        
+
         if (vref<lower) :
             vref = lower
         if (vref > upper):
             vref = upper
-        
+
         if 0 not in self.sensors:
             vref = 3
         if isinstance(vref,(int,float)):
@@ -174,7 +176,7 @@ class MsgCreator(object):
 #            if len(hexStr) < 2:
 #                hexStr.insert(0,'00')
 #            hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
-            
+
             return hexStr
 
     def photoTophotoR(self,photo):
@@ -183,15 +185,15 @@ class MsgCreator(object):
         #   Vsensor = (ADCvalue/4096) × Vref , Vref=1.5V
         #      I = Vsensor / 100000
         #   S1087 lx = 0.625 × 10^6 × I × 1000
-        
+
         lower = 0
         upper = 3500
-        
+
         if (photo<lower) :
             photo = lower
         if (photo > upper):
             photo = upper
-        
+
         if not 1 in self.sensors:
             return "00 00"
         else:
@@ -217,15 +219,15 @@ class MsgCreator(object):
         #   Vsensor = (ADCvalue/4096) × Vref , Vref=1.5V
         #   I = Vsensor / 100000
         #   S1087-01 lx = 0.769 × 10^5 × I × 1000
-        
+
         lower = 0
         upper = 500
-        
+
         if (radiation<lower) :
             radiation = lower
         if (radiation > upper):
             radiation = upper
-        
+
         if not 2 in self.sensors:
             return "00 00"
         else:
@@ -243,19 +245,19 @@ class MsgCreator(object):
 #                    hexStr.insert(0,'00')
 #                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
                 return hexStr
-        
+
     def temperatureTotemperatureR(self,temperature):
         # 25.08 ºC -> 6468
         # T = -39.6 + 0.01 × SOT, 3V & 14 bit in Celsius
-        
+
         lower = 0
         upper = 40
-        
+
         if (temperature<lower) :
             temperature = lower
         if (temperature > upper):
             temperature = upper
-        
+
         if 3 not in self.sensors:
             return "00 00"
         else:
@@ -270,7 +272,7 @@ class MsgCreator(object):
 #                    hexStr.insert(0,'00')
 #                hexStr = ' '.join(str(i).zfill(2) for i in hexStr)
                 return hexStr
-        
+
     def humidityTohumidityR(self,humidity):
         # 34.5% -> 921
         # 100% -> 3081
@@ -278,15 +280,15 @@ class MsgCreator(object):
         # humR = msg.humidity
         # humLinear = 2.0468 + (0.0367*humR) + (-1.5955 *(10**-6)*(humR**2)) #%
         # humTrue = round((temp - 25)*(0.01 + 0.00008* humR) + humLinear,2) #%
-        
+
         lower = 0
         upper = 100
-        
+
         if (humidity<lower) :
             humidity = lower
         if (humidity > upper):
             humidity = upper
-        
+
         if 4 not in self.sensors:
             return "00 00"
         else:
@@ -318,7 +320,7 @@ class MsgCreator(object):
         self.res = self.parser()
         self.updateParser(self.res)
 
-    
+
 
 def printMessage(_hashmap, _it, _myMsgCreator, _ids):
 
@@ -572,16 +574,16 @@ def main():
                 prev_res = act
 
 
-    
+
 #    # int randomNum = min + (int)(Math.random() * (max - min));
-#    # O desvio padrão populacional ou amostral é a raiz quadrada da variância 
+#    # O desvio padrão populacional ou amostral é a raiz quadrada da variância
 #    mu, sigma = 1, 0.1 # mean and standard deviation
-#    
+#
 #    lower, upper = 3.5, 6
 #    mu, sigma = 5, 0.7
 ##    X = scipy.stats.truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
 ##    N = stats.norm(loc=mu, scale=sigma)
-#    
+#
 #    s = stats.truncnorm.rvs((lower-mu)/sigma,(upper-mu)/sigma,loc=mu,scale=sigma,size=100).tolist()
 #    print (s,"\n",min(s), max(s))
 
