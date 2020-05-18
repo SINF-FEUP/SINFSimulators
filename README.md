@@ -64,15 +64,15 @@ In the current repository you can find a file called *dump.sql* that has a short
 
 So you can easily understand the database structure, please use as a reference the following Relational Model:
 
-actuator (**act_id**, name, description)
-room (**name**, description)
-sensor (**type**, description)
-mote (**mote_id**, name, series, #name->Room)
-sensor_mote (**#type->Sensor**, **#mote_id->Mote**)
-rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor, #mote_id->Mote)
-measure (**m_id**, timestamp, value, #type->Sensor, #mote_id->Mote)
-actuator_room (**#act_id->Actuator**, **#name->Room**)
-state (**s_id**, timestamp, state, #act_id->Actuator, #name->Room)
+* actuator (**act_id**, name, description)
+* room (**name**, description)
+* sensor (**type**, description)
+* mote (**mote_id**, name, series, #name->Room)
+* sensor_mote (**#type->Sensor**, **#mote_id->Mote**)
+* rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor, #mote_id->Mote)
+* measure (**m_id**, timestamp, value, #type->Sensor, #mote_id->Mote)
+* actuator_room (**#act_id->Actuator**, **#name->Room**)
+* state (**s_id**, timestamp, state, #act_id->Actuator, #name->Room)
 
 Regarding the above Relational Model, there are a couple aspects that need to be clarified:
 
