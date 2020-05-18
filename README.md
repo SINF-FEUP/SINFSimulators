@@ -55,3 +55,27 @@ struct Measurements{
 struct Actuators{
 	int heater_on;
 };
+
+
+
+# Database for Sprint #3
+
+In the current repository you can find a file called *dump.sql* that has a short version of the database structure for you to use. For those who have completed the minimum required database implementation, please feel free to use this file. In order to use it, once you log in the PostgreSQL phpPgAdmin, you need to click on top of your database, then on the SQL option and upload the file. **If you simply copy+paste de SQL this wil not work!** Please upload the file for the correct database implementaiton.
+
+So you can easily understand the database structure, please use as a reference the following Relational Model:
+
+actuator (**act_id**, name, description)
+room (**name**, description)
+sensor (**type**, description)
+mote (**mote_id**, name, series, #name->Room)
+sensor_mote (**#type->Sensor**, **#mote_id->Mote**)
+rules (**rule_id**, operator, value, #act_id->Actuator, #type->Sensor, #mote_id->Mote)
+measure (**m_id**, timestamp, value, #type->Sensor, #mote_id->Mote)
+actuator_room (**#act_id->Actuator**, **#name->Room**)
+state (**s_id**, timestamp, state, #act_id->Actuator, #name->Room)
+
+Regarding the above Relational Model, there are a couple aspects that need to be clarified:
+
+* The relation *actuator_room* exists because there's a many-to-many association between *actuator* and *room*. This happens just because of the fact that actuators can be moved around rooms, and we need to keep track of those;
+* The relation *sensor* only stores the type 'TEMP' and not the sensor itself 'TEMP1'. Thus, there is a relation dedicated to associating sensors with motes.
+
