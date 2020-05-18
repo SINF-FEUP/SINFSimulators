@@ -62,7 +62,7 @@ struct Actuators{
 
 In the current repository you can find a file called *dump.sql* that has a short version of the database structure for you to use. For those who have completed the minimum required database implementation, please feel free to use this file. In order to use it, once you log in the PostgreSQL phpPgAdmin, you need to click on top of your database, then on the SQL option and upload the file. **If you simply copy+paste de SQL this wil not work!** Please upload the file for the correct database implementaiton.
 
-So you can easily understand the database structure, please use as a reference the following Relational Model:
+So you can easily understand the database structure, please use as a reference the following Relational Model (primary keys in bold font):
 
 * actuator (**act_id**, name, description)
 * room (**name**, description)
