@@ -62,6 +62,15 @@ def circular(Min,Max,sigma,N):
         ys.append((Max-sigma-(Min+sigma))*np.sin(arc_T[i])+Min+sigma +np.random.uniform(-sigma,sigma))          
     return ys
 
+def sin(Amp,Freq,T,N):
+	time = np.arange(0, T, Freq)
+	ys = []
+	signal = Amp*np.sin(time)
+	ys.extend(signal)
+	while len(ys)< N:
+		ys.extend(signal)
+	return ys[0:N]
+
 def pwm(cycles,duty,sigma,N):
         np.random.seed(int(time.time()))
         ys = []
@@ -429,6 +438,12 @@ def generate_hashmap(_myMsgCreator, old_hashmap = None):
 
     _hashmap = {}
     for i in range(len(_myMsgCreator.sensors)):
+        # Sine wave type of curve
+        if _myMsgCreator.dist[i][0] == 'S':
+            Amp, Freq, Time = _myMsgCreator.dist[i][1], _myMsgCreator.dist[i][2], _myMsgCreator.dist[i][3]
+            data = sin(Amp, Freq, Time, _myMsgCreator.lsize * _myMsgCreator.id)
+            # print (len(data)," ",myMsgCreator.lsize)
+            _hashmap[_myMsgCreator.sensors[i]] = data
         # PWM type of curve
         if _myMsgCreator.dist[i][0] == 'P':
             Min, Max, Sigma = _myMsgCreator.dist[i][1], _myMsgCreator.dist[i][2], _myMsgCreator.dist[i][3]
