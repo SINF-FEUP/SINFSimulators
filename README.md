@@ -69,7 +69,7 @@ So you can easily understand the database structure, please use as a reference t
 * sensor_mote (**#type->sensor**, **#mote_id->mote**)
 * rules (**rule_id**, operator, value, #act_id->actuator, #type->sensor, #mote_id->mote)
 * measure (**m_id**, timestamp, value, #type->sensor, #mote_id->mote)
-* actuator_machine (**#act_id->actuator**, **#name->room**)
+* actuator_machine (**#act_id->actuator**, **#name->machine**)
 * state (**s_id**, timestamp, state, #act_id->Actuator, #name->machine)
 
 Regarding the above Relational Model, there are a couple aspects that need to be clarified:
